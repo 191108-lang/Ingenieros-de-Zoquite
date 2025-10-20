@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Autenticación</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0d2dbb 0%, #09ff00 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            max-width: 450px;
+            width: 100%;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+        }
+
+        .toggle-password {
+            left: auto;
+            right: 15px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-password:hover {
+            color: #667eea;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #0f2279;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #ffd000 0%, #5b09ad 100%);
+            color: rgb(255, 0, 0);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #8db3b9;
+        }
+
+        .dashboard {
+            text-align: center;
+        }
+
+        .dashboard h2 {
+            color: #000000;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            background: #0678eb;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .user-info p {
+            margin: 10px 0;
+            color: #ff0000;
+        }
+
+        .user-info strong {
+            color: #000000;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 480px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: #ff0000;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+        }
+
+        .checkbox-container a {
+            color: #000000;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .checkbox-container a:hover {
+            text-decoration: underline;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background-color: rgb(134, 99, 99);
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: rgb(0, 0, 0);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .close {
+            color: rgb(0, 0, 0);
+            font-size: 32px;
+            font-weight: bold;
+            cursor: pointer;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .close:hover {
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: calc(80vh - 80px);
+            overflow-y: auto;
+        }
+
+        .modal-body h3 {
+            color: #ff0000;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .modal-body p {
+            color: #ff0000;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .modal-body ul {
+            color: #ff0000;
+            line-height: 1.8;
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-user-shield"></i> Sistema de Autenticación</h1>
+            <p id="headerText">Inicia sesión para continuar</p>
+        </div>
+
+        <div class="form-container">
+            <div id="alertContainer"></div>
+
+            <!-- Formulario de Login -->
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="loginEmail" required placeholder="ejemplo@correo.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="loginPassword" required placeholder="••••••••">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('loginPassword', this)"></i>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">
+                    <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                </button>
+
+                <div class="toggle-form">
+                    ¿No tienes cuenta? <a onclick="toggleForms()">Regístrate aquí</a>
+                </div>
+            </form>
+
+            <!-- Formulario de Registro -->
+            <form id="registerForm" class="hidden">
+                <div class="row">
+                    <div class="form-group">
+                        <label for="regName">Nombre</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="regName" required placeholder="Juan">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="regLastName">Apellidos</label>
+                        <div class="input-wrapper">
+                            <i class="fas fa-user"></i>
+                            <input type="text" id="regLastName" required placeholder="Pérez">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regBirthDate">Fecha de Nacimiento</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-calendar"></i>
+                        <input type="date" id="regBirthDate" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regEmail">Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="regEmail" required placeholder="ejemplo@correo.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="regPassword">Contraseña</label>
+                    <div class="input-wrapper">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="regPassword" required placeholder="Mínimo 6 caracteres">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword('regPassword', this)"></i>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="termsCheckbox" required>
+                        <span>Acepto los <a href="#" onclick="mostrarTerminos(event)">términos y condiciones</a></span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn">
+                    <i class="fas fa-user-plus"></i> Registrarse
+                </button>
+
+                <div class="toggle-form">
+                    ¿Ya tienes cuenta? <a onclick="toggleForms()">Inicia sesión aquí</a>
+                </div>
+            </form>
+
+            <!-- Dashboard después del login -->
+            <div id="dashboard" class="dashboard hidden">
+                <h2>¡Bienvenido!</h2>
+                <div class="user-info" id="userInfo"></div>
+                <button class="btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Términos y Condiciones -->
+    <div id="modalTerminos" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-contract"></i> Términos y Condiciones</h2>
+                <span class="close" onclick="cerrarTerminos()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><strong>Última actualización:</strong> Octubre 2025</p>
+
+                <h3>1. Aceptación de los Términos</h3>
+                <p>Al acceder y utilizar este sistema de autenticación, usted acepta cumplir con estos términos y condiciones. Si no está de acuerdo con alguna parte de estos términos, no debe utilizar nuestro servicio.</p>
+
+                <h3>2. Registro de Usuario</h3>
+                <p>Para utilizar nuestro servicio, debe:</p>
+                <ul>
+                    <li>Proporcionar información precisa y completa durante el registro</li>
+                    <li>Mantener la seguridad de su contraseña</li>
+                    <li>Ser mayor de 18 años o contar con el consentimiento de un tutor legal</li>
+                    <li>Notificar inmediatamente cualquier uso no autorizado de su cuenta</li>
+                </ul>
+
+                <h3>3. Privacidad y Protección de Datos</h3>
+                <p>Nos comprometemos a proteger su información personal:</p>
+                <ul>
+                    <li>Sus datos se almacenan de forma segura</li>
+                    <li>No compartiremos su información con terceros sin su consentimiento</li>
+                    <li>Utilizamos medidas de seguridad para proteger sus datos</li>
+                    <li>Puede solicitar la eliminación de sus datos en cualquier momento</li>
+                </ul>
+
+                <h3>4. Uso Aceptable</h3>
+                <p>Usted se compromete a:</p>
+                <ul>
+                    <li>No utilizar el servicio para actividades ilegales</li>
+                    <li>No intentar acceder a cuentas de otros usuarios</li>
+                    <li>No compartir sus credenciales con terceros</li>
+                    <li>No realizar actividades que puedan dañar el sistema</li>
+                </ul>
+
+                <h3>5. Responsabilidades del Usuario</h3>
+                <p>Usted es responsable de todas las actividades realizadas bajo su cuenta. Debe mantener la confidencialidad de su contraseña y notificar cualquier acceso no autorizado.</p>
+
+                <h3>6. Modificaciones del Servicio</h3>
+                <p>Nos reservamos el derecho de modificar o discontinuar el servicio en cualquier momento, con o sin previo aviso.</p>
+
+                <h3>7. Limitación de Responsabilidad</h3>
+                <p>El servicio se proporciona "tal cual" sin garantías de ningún tipo. No seremos responsables de daños indirectos, incidentales o consecuentes.</p>
+
+                <h3>8. Terminación</h3>
+                <p>Podemos suspender o terminar su acceso al servicio si viola estos términos y condiciones.</p>
+
+                <h3>9. Ley Aplicable</h3>
+                <p>Estos términos se rigen por las leyes aplicables en su jurisdicción.</p>
+
+                <h3>10. Contacto</h3>
+                <p>Si tiene preguntas sobre estos términos, puede contactarnos a través de nuestros canales oficiales de soporte.</p>
+
+                <p style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #ff0101;">
+                    <strong>Al marcar la casilla de aceptación, confirma que ha leído y acepta estos términos y condiciones.</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sistema de almacenamiento en memoria
+        let usuarios = {};
+        let usuarioActual = null;
+
+        // Inicializar con un usuario de ejemplo
+        usuarios['demo@correo.com'] = {
+            nombre: 'Usuario',
+            apellidos: 'Demo',
+            fechaNacimiento: '1990-01-01',
+            email: 'demo@correo.com',
+            password: 'demo123'
+        };
+
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo) {
+            const alertContainer = document.getElementById('alertContainer');
+            alertContainer.innerHTML = `<div class="alert alert-${tipo}">${mensaje}</div>`;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 4000);
+        }
+
+        // Alternar entre formularios
+        function toggleForms() {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const headerText = document.getElementById('headerText');
+
+            loginForm.classList.toggle('hidden');
+            registerForm.classList.toggle('hidden');
+
+            if (loginForm.classList.contains('hidden')) {
+                headerText.textContent = 'Crea tu cuenta';
+            } else {
+                headerText.textContent = 'Inicia sesión para continuar';
+            }
+        }
+
+        // Manejar el login
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (usuarios[email]) {
+                if (usuarios[email].password === password) {
+                    usuarioActual = usuarios[email];
+                    mostrarDashboard();
+                    mostrarAlerta('¡Inicio de sesión exitoso!', 'success');
+                } else {
+                    mostrarAlerta('Contraseña incorrecta', 'error');
+                }
+            } else {
+                mostrarAlerta('Este correo no está registrado. Por favor, regístrate.', 'error');
+            }
+        });
+
+        // Manejar el registro
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById('regName').value;
+            const apellidos = document.getElementById('regLastName').value;
+            const fechaNacimiento = document.getElementById('regBirthDate').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            if (usuarios[email]) {
+                mostrarAlerta('Este correo ya está registrado. Inicia sesión.', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                mostrarAlerta('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+
+            // Registrar nuevo usuario
+            usuarios[email] = {
+                nombre: nombre,
+                apellidos: apellidos,
+                fechaNacimiento: fechaNacimiento,
+                email: email,
+                password: password
+            };
+
+            mostrarAlerta('¡Registro exitoso! Ahora puedes iniciar sesión.', 'success');
+            
+            // Limpiar formulario y cambiar a login
+            document.getElementById('registerForm').reset();
+            setTimeout(() => {
+                toggleForms();
+            }, 2000);
+        });
+
+        // Mostrar dashboard
+        function mostrarDashboard() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('headerText').textContent = '¡Sesión Activa!';
+
+            const userInfo = document.getElementById('userInfo');
+            userInfo.innerHTML = `
+                <p><strong><i class="fas fa-user"></i> Nombre:</strong> ${usuarioActual.nombre} ${usuarioActual.apellidos}</p>
+                <p><strong><i class="fas fa-envelope"></i> Email:</strong> ${usuarioActual.email}</p>
+                <p><strong><i class="fas fa-calendar"></i> Fecha de Nacimiento:</strong> ${usuarioActual.fechaNacimiento}</p>
+            `;
+        }
+
+        // Cerrar sesión
+        function logout() {
+            usuarioActual = null;
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('headerText').textContent = 'Inicia sesión para continuar';
+            document.getElementById('loginForm').reset();
+            mostrarAlerta('Has cerrado sesión correctamente', 'info');
+        }
+
+        // Mensaje inicial
+        console.log('Sistema iniciado. Usuario demo disponible:');
+        console.log('Email: demo@correo.com');
+        console.log('Password: demo123');
+    </script>
+</body>
+</html>
