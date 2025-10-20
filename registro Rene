@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Login y Registro</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .checkbox-group a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .checkbox-group a:hover {
+            text-decoration: underline;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .toggle-form {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .toggle-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .toggle-form a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .success {
+            background: #2ecc71;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .download-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .download-btn {
+            background: #2ecc71;
+            margin-top: 10px;
+        }
+
+        .download-btn:hover {
+            background: #27ae60;
+        }
+
+        .user-count {
+            text-align: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Formulario de Login -->
+        <div id="loginForm">
+            <h2>Iniciar Sesión</h2>
+            <div id="loginSuccess" class="success hidden"></div>
+            
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="loginEmail">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" required>
+                    <div id="loginEmailError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <input type="password" id="loginPassword" required>
+                    <div id="loginPasswordError" class="error"></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="loginTerms" required>
+                    <label for="loginTerms">
+                        Acepto los <a href="#" onclick="showTerms(); return false;">términos y condiciones</a>
+                    </label>
+                </div>
+
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+
+            <div class="toggle-form">
+                ¿No tienes cuenta? <a href="#" onclick="showRegister(); return false;">Regístrate aquí</a>
+            </div>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div id="registerForm" class="hidden">
+            <h2>Registro</h2>
+            <div id="registerSuccess" class="success hidden"></div>
+            
+            <form onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="fullName">Nombre Completo</label>
+                    <input type="text" id="fullName" required>
+                    <div id="fullNameError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="username">Nombre de Usuario</label>
+                    <input type="text" id="username" required>
+                    <div id="usernameError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerEmail">Correo Electrónico</label>
+                    <input type="email" id="registerEmail" required>
+                    <div id="registerEmailError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">Contraseña</label>
+                    <input type="password" id="registerPassword" required>
+                    <div id="registerPasswordError" class="error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Contraseña</label>
+                    <input type="password" id="confirmPassword" required>
+                    <div id="confirmPasswordError" class="error"></div>
+                </div>
+
+                <div class="checkbox-group">
+                    <input type="checkbox" id="registerTerms" required>
+                    <label for="registerTerms">
+                        Acepto los <a href="#" onclick="showTerms(); return false;">términos y condiciones</a>
+                    </label>
+                </div>
+
+                <button type="submit">Registrarse</button>
+            </form>
+
+            <div class="toggle-form">
+                ¿Ya tienes cuenta? <a href="#" onclick="showLogin(); return false;">Inicia sesión aquí</a>
+            </div>
+
+            <div class="download-section">
+                <p class="user-count" id="userCount">Usuarios registrados: 0</p>
+                <button class="download-btn" onclick="downloadCSV()">Descargar Usuarios (CSV)</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Almacenamiento de usuarios en memoria
+        let users = [];
+
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+            clearErrors();
+        }
+
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+            clearErrors();
+        }
+
+        function showTerms() {
+            alert('Términos y Condiciones:\n\n1. Aceptas proporcionar información verídica.\n2. Mantendrás la confidencialidad de tu contraseña.\n3. No compartirás tu cuenta con terceros.\n4. Cumplirás con todas las políticas de uso.\n5. Tus datos serán protegidos según nuestras políticas de privacidad.');
+        }
+
+        function clearErrors() {
+            const errors = document.querySelectorAll('.error');
+            errors.forEach(error => error.textContent = '');
+            
+            const successMsgs = document.querySelectorAll('.success');
+            successMsgs.forEach(msg => msg.classList.add('hidden'));
+        }
+
+        function handleRegister(e) {
+            e.preventDefault();
+            clearErrors();
+
+            const fullName = document.getElementById('fullName').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const terms = document.getElementById('registerTerms').checked;
+
+            let isValid = true;
+
+            // Validaciones
+            if (fullName.length < 3) {
+                document.getElementById('fullNameError').textContent = 'El nombre debe tener al menos 3 caracteres';
+                isValid = false;
+            }
+
+            if (username.length < 3) {
+                document.getElementById('usernameError').textContent = 'El usuario debe tener al menos 3 caracteres';
+                isValid = false;
+            }
+
+            // Verificar si el usuario ya existe
+            if (users.some(u => u.username === username)) {
+                document.getElementById('usernameError').textContent = 'Este nombre de usuario ya está registrado';
+                isValid = false;
+            }
+
+            if (users.some(u => u.email === email)) {
+                document.getElementById('registerEmailError').textContent = 'Este correo ya está registrado';
+                isValid = false;
+            }
+
+            if (password.length < 6) {
+                document.getElementById('registerPasswordError').textContent = 'La contraseña debe tener al menos 6 caracteres';
+                isValid = false;
+            }
+
+            if (password !== confirmPassword) {
+                document.getElementById('confirmPasswordError').textContent = 'Las contraseñas no coinciden';
+                isValid = false;
+            }
+
+            if (!terms) {
+                alert('Debes aceptar los términos y condiciones');
+                isValid = false;
+            }
+
+            if (isValid) {
+                // Guardar usuario
+                const newUser = {
+                    fullName,
+                    username,
+                    email,
+                    password,
+                    registeredAt: new Date().toISOString()
+                };
+
+                users.push(newUser);
+
+                // Mostrar mensaje de éxito
+                const successMsg = document.getElementById('registerSuccess');
+                successMsg.textContent = '¡Registro exitoso! Ahora puedes iniciar sesión.';
+                successMsg.classList.remove('hidden');
+
+                // Limpiar formulario
+                document.getElementById('fullName').value = '';
+                document.getElementById('username').value = '';
+                document.getElementById('registerEmail').value = '';
+                document.getElementById('registerPassword').value = '';
+                document.getElementById('confirmPassword').value = '';
+                document.getElementById('registerTerms').checked = false;
+
+                // Actualizar contador
+                updateUserCount();
+
+                // Cambiar a login después de 2 segundos
+                setTimeout(() => {
+                    showLogin();
+                }, 2000);
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            clearErrors();
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const terms = document.getElementById('loginTerms').checked;
+
+            let isValid = true;
+
+            if (!terms) {
+                alert('Debes aceptar los términos y condiciones');
+                return;
+            }
+
+            // Buscar usuario
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (!user) {
+                document.getElementById('loginEmailError').textContent = 'Correo o contraseña incorrectos';
+                isValid = false;
+            }
+
+            if (isValid) {
+                const successMsg = document.getElementById('loginSuccess');
+                successMsg.textContent = `¡Bienvenido ${user.fullName}!`;
+                successMsg.classList.remove('hidden');
+
+                // Limpiar formulario
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+                document.getElementById('loginTerms').checked = false;
+
+                setTimeout(() => {
+                    alert(`Sesión iniciada exitosamente como ${user.username}`);
+                }, 1000);
+            }
+        }
+
+        function updateUserCount() {
+            document.getElementById('userCount').textContent = `Usuarios registrados: ${users.length}`;
+        }
+
+        function downloadCSV() {
+            if (users.length === 0) {
+                alert('No hay usuarios registrados para descargar');
+                return;
+            }
+
+            // Crear encabezados del CSV
+            let csv = 'Nombre Completo,Nombre de Usuario,Correo Electrónico,Fecha de Registro\n';
+
+            // Agregar datos de usuarios
+            users.forEach(user => {
+                const date = new Date(user.registeredAt).toLocaleString('es-MX');
+                csv += `"${user.fullName}","${user.username}","${user.email}","${date}"\n`;
+            });
+
+            // Crear blob y descargar
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            link.setAttribute('href', url);
+            link.setAttribute('download', `usuarios_${new Date().getTime()}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // Inicializar contador
+        updateUserCount();
+    </script>
+</body>
+</html>
