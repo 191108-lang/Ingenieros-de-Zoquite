@@ -4,134 +4,498 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Autenticación</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Material Design 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
     <style>
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes scaleIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
-        .animate-scaleIn { animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-background: #F5F1F8;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--md-sys-color-surface);
+            border-radius: 28px;
+            box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, #764ba2 100%);
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .card-header .icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .card-header .material-icons {
+            font-size: 32px;
+        }
+
+        .card-header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .card-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card-content {
+            padding: 24px;
+        }
+
+        .text-field {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .text-field.hidden {
+            display: none;
+        }
+
+        .text-field input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: 1px solid var(--md-sys-color-on-surface-variant);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .text-field input:focus {
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            padding: 15px 15px 15px 47px;
+        }
+
+        .text-field .icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .text-field label {
+            position: absolute;
+            left: 48px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .text-field input:focus + label,
+        .text-field input:not(:placeholder-shown) + label {
+            top: -10px;
+            left: 12px;
+            font-size: 12px;
+            background: var(--md-sys-color-surface);
+            padding: 0 4px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .error-message {
+            color: var(--md-sys-color-error);
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: 16px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .text-field.error input {
+            border-color: var(--md-sys-color-error);
+            border-width: 2px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Roboto', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button-primary {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-top: 8px;
+        }
+
+        .button-primary:hover {
+            background: #5a3f94;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
+
+        .button-primary:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+            margin: 24px 0;
+        }
+
+        .text-center {
+            text-align: center;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
+        .text-button {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .text-button:hover {
+            background: var(--md-sys-color-primary-container);
+        }
+
+        .snackbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #323232;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .snackbar.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .snackbar.success {
+            background: #2e7d32;
+        }
+
+        .snackbar.error {
+            background: #c62828;
+        }
+
+        .admin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .admin-overlay.show {
+            display: flex;
+        }
+
+        .admin-dialog {
+            background: var(--md-sys-color-surface);
+            border-radius: 28px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .admin-header {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h2 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .admin-content {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--md-sys-color-primary-container);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-primary-container);
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--md-sys-color-surface-variant);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--md-sys-color-surface-variant);
+            padding: 16px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        tr:hover {
+            background: var(--md-sys-color-surface-variant);
+        }
+
+        .button-secondary {
+            background: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-secondary:hover {
+            background: #544c63;
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 min-h-screen flex items-center justify-center p-4">
-    
-    <div class="w-full max-w-md">
-        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
-            
-            <div class="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 p-8 text-white overflow-hidden">
-                <div class="absolute inset-0 bg-white opacity-10"></div>
-                <div class="relative z-10">
-                    <div class="flex items-center justify-center mb-4">
-                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-2xl flex items-center justify-center">
-                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                    <h1 id="title" class="text-3xl font-bold mb-2 text-center">Iniciar Sesión</h1>
-                    <p class="text-indigo-100 text-center text-sm">Bienvenido al sistema</p>
-                </div>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <div class="icon">
+                <span class="material-icons">person</span>
             </div>
+            <h1 id="title">Iniciar Sesion</h1>
+            <p>Bienvenido al sistema</p>
+        </div>
 
-            <div class="p-8 space-y-4">
-                
-                <div id="nameField" class="hidden space-y-1.5">
-                    <label class="flex items-center text-sm font-semibold text-gray-700">
-                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                        Nombre completo
-                    </label>
-                    <input type="text" id="name" class="w-full px-4 py-2.5 rounded-2xl border-2 border-gray-200 bg-gray-50 transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100" placeholder="Juan Pérez García">
-                    <div id="nameError" class="hidden text-red-600 text-sm font-semibold"></div>
+        <div class="card-content">
+            <form id="authForm">
+                <div class="text-field hidden" id="nameField">
+                    <span class="material-icons icon">badge</span>
+                    <input type="text" id="nombre" placeholder=" ">
+                    <label>Nombre completo</label>
+                    <div class="error-message" id="nombreError"></div>
                 </div>
 
-                <div id="birthdateField" class="hidden space-y-1.5">
-                    <label class="flex items-center text-sm font-semibold text-gray-700">
-                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        Fecha de Nacimiento
-                    </label>
-                    <input type="date" id="birthdate" class="w-full px-4 py-2.5 rounded-2xl border-2 border-gray-200 bg-gray-50 transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100">
-                    <div id="birthdateError" class="hidden text-red-600 text-sm font-semibold"></div>
+                <div class="text-field hidden" id="birthdateField">
+                    <span class="material-icons icon">cake</span>
+                    <input type="date" id="fecha_nacimiento" placeholder=" ">
+                    <label>Fecha de Nacimiento</label>
+                    <div class="error-message" id="fecha_nacimientoError"></div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <label class="flex items-center text-sm font-semibold text-gray-700">
-                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        Correo Electrónico
-                    </label>
-                    <input type="email" id="email" class="w-full px-4 py-2.5 rounded-2xl border-2 border-gray-200 bg-gray-50 transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100" placeholder="correo@ejemplo.com">
-                    <div id="emailError" class="hidden text-red-600 text-sm font-semibold"></div>
+                <div class="text-field">
+                    <span class="material-icons icon">email</span>
+                    <input type="email" id="email" placeholder=" ">
+                    <label>Correo Electronico</label>
+                    <div class="error-message" id="emailError"></div>
                 </div>
 
-                <div class="space-y-1.5">
-                    <label class="flex items-center text-sm font-semibold text-gray-700">
-                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        Contraseña
-                    </label>
-                    <input type="password" id="password" class="w-full px-4 py-2.5 rounded-2xl border-2 border-gray-200 bg-gray-50 transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100" placeholder="••••••••">
-                    <div id="passwordError" class="hidden text-red-600 text-sm font-semibold"></div>
+                <div class="text-field">
+                    <span class="material-icons icon">lock</span>
+                    <input type="password" id="password" placeholder=" ">
+                    <label>Contrasena</label>
+                    <div class="error-message" id="passwordError"></div>
                 </div>
 
-                <div id="confirmPasswordField" class="hidden space-y-1.5">
-                    <label class="flex items-center text-sm font-semibold text-gray-700">
-                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        Confirmar Contraseña
-                    </label>
-                    <input type="password" id="confirmPassword" class="w-full px-4 py-2.5 rounded-2xl border-2 border-gray-200 bg-gray-50 transition-all duration-300 focus:outline-none focus:border-indigo-500 focus:bg-white focus:ring-4 focus:ring-indigo-100" placeholder="••••••••">
-                    <div id="confirmPasswordError" class="hidden text-red-600 text-sm font-semibold"></div>
+                <div class="text-field hidden" id="confirmPasswordField">
+                    <span class="material-icons icon">lock</span>
+                    <input type="password" id="confirmPassword" placeholder=" ">
+                    <label>Confirmar Contrasena</label>
+                    <div class="error-message" id="confirmPasswordError"></div>
                 </div>
 
-                <button id="submitBtn" class="w-full bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white py-3.5 rounded-2xl font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300 mt-6">
-                    <span id="btnText">Iniciar Sesión</span>
+                <button type="submit" class="button button-primary" id="submitBtn">
+                    Iniciar Sesion
+                </button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="text-center">
+                <span id="switchText">No tienes cuenta?</span>
+                <button class="text-button" id="switchBtn">Registrate aqui</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="snackbar" id="snackbar">
+        <span class="material-icons" id="snackbarIcon"></span>
+        <span id="snackbarMessage"></span>
+    </div>
+
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-dialog">
+            <div class="admin-header">
+                <h2>Panel de Administrador</h2>
+                <button class="text-button" onclick="cerrarAdmin()" style="color: white;">
+                    <span class="material-icons">close</span>
                 </button>
             </div>
-
-            <div class="px-8 pb-8 text-center border-t border-gray-100 pt-6">
-                <p class="text-gray-600 text-sm">
-                    <span id="switchText">¿No tienes cuenta?</span>
-                    <button id="switchBtn" class="ml-2 text-indigo-600 hover:text-indigo-700 font-bold transition-colors hover:underline">Regístrate aquí</button>
-                </p>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl">
-            <div id="modalIcon" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
-                    <path id="modalPath" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
-            </div>
-            <h3 id="modalTitle" class="text-2xl font-bold text-gray-800 mb-3"></h3>
-            <p id="modalMessage" class="text-gray-600 text-lg"></p>
-        </div>
-    </div>
-
-    <div id="adminPanel" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-screen overflow-y-auto">
-            <div class="sticky top-0 bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white flex justify-between items-center">
-                <h2 class="text-2xl font-bold">Panel de Administrador</h2>
-                <button onclick="closeAdmin()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-xl font-bold transition">Cerrar</button>
-            </div>
-            
-            <div class="p-6 space-y-6">
-                <div class="flex justify-between items-center">
-                    <span id="userCount" class="text-lg font-bold text-gray-700">0 usuarios registrados</span>
-                    <button onclick="downloadCSV()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl transition">
-                        Descargar CSV
-                    </button>
+            <div class="admin-content">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="number" id="totalUsuarios">0</div>
+                        <div class="label">Usuarios Registrados</div>
+                    </div>
                 </div>
-                
-                <div id="userTable" class="overflow-x-auto">
-                    <p class="text-gray-500 text-center py-8">No hay usuarios</p>
+
+                <button class="button button-secondary" onclick="descargarCSV()" style="margin-bottom: 16px;">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">download</span>
+                    Descargar CSV
+                </button>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Edad</th>
+                                <th>Fecha Nacimiento</th>
+                                <th>Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuariosTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #999;">
+                                    Cargando usuarios...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -139,334 +503,220 @@
 
     <script>
         let isLogin = true;
-        
-        document.getElementById('birthdate').max = new Date().toISOString().split('T')[0];
 
-        function getUsers() {
-            const users = localStorage.getItem('usuarios_csv');
-            return users ? JSON.parse(users) : [];
-        }
+        document.getElementById('fecha_nacimiento').max = new Date().toISOString().split('T')[0];
 
-        function saveUsers(users) {
-            localStorage.setItem('usuarios_csv', JSON.stringify(users));
-            saveToCSVFile(users);
-        }
+        document.getElementById('switchBtn').addEventListener('click', function() {
+            isLogin = !isLogin;
+            const nameField = document.getElementById('nameField');
+            const birthdateField = document.getElementById('birthdateField');
+            const confirmPasswordField = document.getElementById('confirmPasswordField');
+            const title = document.getElementById('title');
+            const switchText = document.getElementById('switchText');
+            const switchBtn = document.getElementById('switchBtn');
+            const submitBtn = document.getElementById('submitBtn');
 
-        function saveToCSVFile(users) {
-            let csv = 'id,nombre,fecha_nacimiento,edad,email,password,fecha_registro\n';
-            users.forEach(user => {
-                csv += user.id + ',' + user.nombre + ',' + user.fecha_nacimiento + ',' + user.edad + ',' + user.email + ',' + user.password + ',' + user.fecha_registro + '\n';
-            });
-            localStorage.setItem('usuarios_csv_content', csv);
-        }
-
-        function calculateAge(date) {
-            const today = new Date();
-            const birth = new Date(date);
-            let age = today.getFullYear() - birth.getFullYear();
-            const m = today.getMonth() - birth.getMonth();
-            if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-            return age;
-        }
-
-        function generateId() {
-            return Date.now().toString() + Math.random().toString(36).substr(2, 9);
-        }
-
-        async function hashPassword(password) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(password);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-        window.adminPanel = function(password) {
-            if (password === 'Admin2024!') {
-                document.getElementById('adminPanel').classList.remove('hidden');
-                updateUserTable();
-                console.log('%c✓ Panel de Administrador Abierto', 'color: green; font-size: 16px; font-weight: bold;');
-                return 'Panel abierto';
+            if (isLogin) {
+                nameField.classList.add('hidden');
+                birthdateField.classList.add('hidden');
+                confirmPasswordField.classList.add('hidden');
+                title.textContent = 'Iniciar Sesion';
+                switchText.textContent = 'No tienes cuenta?';
+                switchBtn.textContent = 'Registrate aqui';
+                submitBtn.textContent = 'Iniciar Sesion';
             } else {
-                console.log('%c✗ Contraseña Incorrecta', 'color: red; font-size: 16px; font-weight: bold;');
-                return 'Contraseña incorrecta';
-            }
-        };
-
-        function closeAdmin() {
-            document.getElementById('adminPanel').classList.add('hidden');
-        }
-
-        function downloadCSV() {
-            const users = getUsers();
-            if (users.length === 0) {
-                alert('No hay usuarios para descargar');
-                return;
+                nameField.classList.remove('hidden');
+                birthdateField.classList.remove('hidden');
+                confirmPasswordField.classList.remove('hidden');
+                title.textContent = 'Crear Cuenta';
+                switchText.textContent = 'Ya tienes cuenta?';
+                switchBtn.textContent = 'Inicia Sesion';
+                submitBtn.textContent = 'Registrarse';
             }
 
-            const csv = localStorage.getItem('usuarios_csv_content');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            const fecha = new Date().toISOString().split('T')[0];
-            
-            link.href = url;
-            link.download = 'usuarios_' + fecha + '.csv';
-            link.style.display = 'none';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            limpiarFormulario();
+        });
 
-            showModal(true, 'CSV Descargado', 'Archivo descargado correctamente');
-        }
+        document.getElementById('authForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
 
-        function updateUserTable() {
-            const users = getUsers();
-            const table = document.getElementById('userTable');
-            const count = document.getElementById('userCount');
+            if (!validarFormulario()) return;
 
-            count.textContent = users.length + ' usuarios registrados';
-
-            if (users.length === 0) {
-                table.innerHTML = '<p class="text-gray-500 text-center py-8">No hay usuarios</p>';
-                return;
-            }
-
-            let html = '<table class="w-full text-sm border-collapse"><thead class="bg-gradient-to-r from-indigo-50 to-purple-50"><tr>';
-            html += '<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 border-b-2 border-indigo-200">ID</th>';
-            html += '<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 border-b-2 border-indigo-200">NOMBRE</th>';
-            html += '<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 border-b-2 border-indigo-200">EMAIL</th>';
-            html += '<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 border-b-2 border-indigo-200">EDAD</th>';
-            html += '<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 border-b-2 border-indigo-200">FECHA NAC.</th>';
-            html += '<th class="px-4 py-3 text-left text-xs font-bold text-gray-700 border-b-2 border-indigo-200">REGISTRO</th>';
-            html += '</tr></thead><tbody>';
-
-            users.forEach((user, index) => {
-                const bgColor = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
-                html += '<tr class="' + bgColor + ' hover:bg-indigo-50 transition">';
-                html += '<td class="px-4 py-3 text-gray-600 border-b border-gray-200 text-xs">' + user.id.substr(0, 8) + '...</td>';
-                html += '<td class="px-4 py-3 text-gray-800 font-medium border-b border-gray-200">' + user.nombre + '</td>';
-                html += '<td class="px-4 py-3 text-gray-600 border-b border-gray-200">' + user.email + '</td>';
-                html += '<td class="px-4 py-3 text-gray-600 border-b border-gray-200">' + user.edad + ' años</td>';
-                html += '<td class="px-4 py-3 text-gray-600 border-b border-gray-200">' + user.fecha_nacimiento + '</td>';
-                html += '<td class="px-4 py-3 text-gray-600 border-b border-gray-200">' + user.fecha_registro + '</td>';
-                html += '</tr>';
-            });
-
-            html += '</tbody></table>';
-            table.innerHTML = html;
-        }
-
-        function showError(field, msg) {
-            const errorEl = document.getElementById(field + 'Error');
-            const inputEl = document.getElementById(field);
-            errorEl.textContent = msg;
-            errorEl.classList.remove('hidden');
-            inputEl.classList.add('border-red-400', 'bg-red-50');
-        }
-
-        function hideError(field) {
-            const errorEl = document.getElementById(field + 'Error');
-            const inputEl = document.getElementById(field);
-            errorEl.classList.add('hidden');
-            inputEl.classList.remove('border-red-400', 'bg-red-50');
-        }
-
-        function clearForm() {
-            const fields = ['name', 'birthdate', 'email', 'password', 'confirmPassword'];
-            fields.forEach(f => {
-                const el = document.getElementById(f);
-                if (el) {
-                    el.value = '';
-                    hideError(f);
-                }
-            });
-        }
-
-        function showModal(success, title, msg) {
-            const icon = document.getElementById('modalIcon');
-            const path = document.getElementById('modalPath');
-            
-            if (success) {
-                icon.className = 'w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6';
-                path.setAttribute('d', 'M5 13l4 4L19 7');
-            } else {
-                icon.className = 'w-20 h-20 bg-red-500 rounded-full flex items-center justify-center mx-auto mb-6';
-                path.setAttribute('d', 'M6 18L18 6M6 6l12 12');
-            }
-            
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalMessage').textContent = msg;
-            document.getElementById('modal').classList.remove('hidden');
-            
-            setTimeout(function() {
-                document.getElementById('modal').classList.add('hidden');
-                if (success && !isLogin) clearForm();
-            }, 3000);
-        }
-
-        function validate() {
-            let valid = true;
+            const data = {
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value
+            };
 
             if (!isLogin) {
-                const name = document.getElementById('name').value.trim();
-                if (!name) {
-                    showError('name', 'Nombre requerido');
-                    valid = false;
-                } else if (name.length < 3) {
-                    showError('name', 'Mínimo 3 caracteres');
-                    valid = false;
+                data.nombre = document.getElementById('nombre').value.trim();
+                data.fecha_nacimiento = document.getElementById('fecha_nacimiento').value;
+            }
+
+            const endpoint = isLogin ? '/api/login' : '/api/registro';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarSnackbar(result.mensaje, 'success');
+                    if (!isLogin) limpiarFormulario();
                 } else {
-                    hideError('name');
+                    mostrarSnackbar(result.error, 'error');
+                }
+            } catch (error) {
+                mostrarSnackbar('Error de conexion', 'error');
+            }
+        });
+
+        function validarFormulario() {
+            let valido = true;
+
+            if (!isLogin) {
+                const nombre = document.getElementById('nombre').value.trim();
+                if (!nombre || nombre.length < 3) {
+                    mostrarError('nombre', 'Minimo 3 caracteres');
+                    valido = false;
+                } else {
+                    ocultarError('nombre');
                 }
 
-                const birthdate = document.getElementById('birthdate').value;
-                if (!birthdate) {
-                    showError('birthdate', 'Fecha requerida');
-                    valid = false;
+                const fechaNac = document.getElementById('fecha_nacimiento').value;
+                if (!fechaNac) {
+                    mostrarError('fecha_nacimiento', 'Fecha requerida');
+                    valido = false;
                 } else {
-                    const age = calculateAge(birthdate);
-                    if (age < 18) {
-                        showError('birthdate', 'Debes ser mayor de 18');
-                        valid = false;
-                    } else if (age > 100) {
-                        showError('birthdate', 'Fecha inválida');
-                        valid = false;
-                    } else {
-                        hideError('birthdate');
-                    }
+                    ocultarError('fecha_nacimiento');
+                }
+
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const password = document.getElementById('password').value;
+                if (confirmPassword !== password) {
+                    mostrarError('confirmPassword', 'Las contrasenas no coinciden');
+                    valido = false;
+                } else {
+                    ocultarError('confirmPassword');
                 }
             }
 
             const email = document.getElementById('email').value.trim();
-            if (!email) {
-                showError('email', 'Email requerido');
-                valid = false;
-            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                showError('email', 'Email inválido');
-                valid = false;
+            if (!email || !email.includes('@')) {
+                mostrarError('email', 'Email invalido');
+                valido = false;
             } else {
-                hideError('email');
+                ocultarError('email');
             }
 
             const password = document.getElementById('password').value;
-            if (!password) {
-                showError('password', 'Contraseña requerida');
-                valid = false;
-            } else if (password.length < 8) {
-                showError('password', 'Mínimo 8 caracteres');
-                valid = false;
-            } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-                showError('password', 'Debe tener mayúscula, minúscula y número');
-                valid = false;
+            if (!password || password.length < 8) {
+                mostrarError('password', 'Minimo 8 caracteres');
+                valido = false;
             } else {
-                hideError('password');
+                ocultarError('password');
             }
 
-            if (!isLogin) {
-                const confirm = document.getElementById('confirmPassword').value;
-                if (!confirm) {
-                    showError('confirmPassword', 'Confirma tu contraseña');
-                    valid = false;
-                } else if (confirm !== password) {
-                    showError('confirmPassword', 'Las contraseñas no coinciden');
-                    valid = false;
-                } else {
-                    hideError('confirmPassword');
-                }
-            }
-
-            return valid;
+            return valido;
         }
 
-        document.getElementById('switchBtn').addEventListener('click', function() {
-            isLogin = !isLogin;
-            
-            if (isLogin) {
-                document.getElementById('nameField').classList.add('hidden');
-                document.getElementById('birthdateField').classList.add('hidden');
-                document.getElementById('confirmPasswordField').classList.add('hidden');
-                document.getElementById('title').textContent = 'Iniciar Sesión';
-                document.getElementById('switchText').textContent = '¿No tienes cuenta?';
-                document.getElementById('switchBtn').textContent = 'Regístrate aquí';
-                document.getElementById('btnText').textContent = 'Iniciar Sesión';
-            } else {
-                document.getElementById('nameField').classList.remove('hidden');
-                document.getElementById('birthdateField').classList.remove('hidden');
-                document.getElementById('confirmPasswordField').classList.remove('hidden');
-                document.getElementById('title').textContent = 'Crear Cuenta';
-                document.getElementById('switchText').textContent = '¿Ya tienes cuenta?';
-                document.getElementById('switchBtn').textContent = 'Inicia Sesión';
-                document.getElementById('btnText').textContent = 'Registrarse';
-            }
-            
-            clearForm();
-        });
+        function mostrarError(campo, mensaje) {
+            const field = document.getElementById(campo).closest('.text-field');
+            const errorDiv = document.getElementById(campo + 'Error');
+            field.classList.add('error');
+            errorDiv.textContent = mensaje;
+            errorDiv.classList.add('show');
+        }
 
-        document.getElementById('submitBtn').addEventListener('click', async function() {
-            if (!validate()) return;
+        function ocultarError(campo) {
+            const field = document.getElementById(campo).closest('.text-field');
+            const errorDiv = document.getElementById(campo + 'Error');
+            field.classList.remove('error');
+            errorDiv.classList.remove('show');
+        }
 
-            if (!isLogin) {
-                const users = getUsers();
-                const email = document.getElementById('email').value.trim().toLowerCase();
-                
-                if (users.some(function(u) { return u.email === email; })) {
-                    showModal(false, 'Error', 'Este email ya está registrado');
-                    return;
-                }
+        function limpiarFormulario() {
+            document.getElementById('authForm').reset();
+            ['nombre', 'email', 'password', 'fecha_nacimiento', 'confirmPassword'].forEach(ocultarError);
+        }
 
-                const birthdate = document.getElementById('birthdate').value;
-                const newUser = {
-                    id: generateId(),
-                    nombre: document.getElementById('name').value.trim(),
-                    fecha_nacimiento: birthdate,
-                    edad: calculateAge(birthdate),
-                    email: email,
-                    password: await hashPassword(document.getElementById('password').value),
-                    fecha_registro: new Date().toISOString().split('T')[0]
-                };
+        function mostrarSnackbar(mensaje, tipo) {
+            const snackbar = document.getElementById('snackbar');
+            const icon = document.getElementById('snackbarIcon');
+            const message = document.getElementById('snackbarMessage');
 
-                users.push(newUser);
-                saveUsers(users);
-                showModal(true, 'Cuenta creada', 'Bienvenido ' + newUser.nombre);
-                console.log('%c✓ Usuario registrado automáticamente en CSV', 'color: green; font-size: 12px;');
-            } else {
-                const users = getUsers();
-                const email = document.getElementById('email').value.trim().toLowerCase();
-                const password = await hashPassword(document.getElementById('password').value);
-                
-                const user = users.find(function(u) { return u.email === email; });
-                
-                if (!user) {
-                    showModal(false, 'Error', 'No existe cuenta con este email');
-                    return;
-                }
+            icon.textContent = tipo === 'success' ? 'check_circle' : 'error';
+            message.textContent = mensaje;
+            snackbar.className = 'snackbar ' + tipo + ' show';
 
-                if (user.password !== password) {
-                    showModal(false, 'Error', 'Contraseña incorrecta');
-                    return;
-                }
+            setTimeout(function() {
+                snackbar.classList.remove('show');
+            }, 3000);
+        }
 
-                showModal(true, 'Bienvenido', 'Hola ' + user.nombre);
-            }
-        });
-
-        document.addEventListener('keydown', function(e) {
+        document.addEventListener('keydown', async function(e) {
             if (e.ctrlKey && e.key === 'a') {
                 e.preventDefault();
-                const password = prompt('Ingresa la contraseña de administrador:');
-                if (password === 'Admin2024!') {
-                    document.getElementById('adminPanel').classList.remove('hidden');
-                    updateUserTable();
-                    console.log('%c✓ Panel de Administrador Abierto', 'color: green; font-size: 16px; font-weight: bold;');
-                } else if (password !== null) {
-                    alert('Contraseña incorrecta');
-                    console.log('%c✗ Acceso Denegado', 'color: red; font-size: 14px;');
+                const password = prompt('Contrasena de administrador:');
+                
+                if (password) {
+                    try {
+                        const response = await fetch('/api/admin/login', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({password: password})
+                        });
+
+                        if (response.ok) {
+                            document.getElementById('adminOverlay').classList.add('show');
+                            cargarUsuarios();
+                        } else {
+                            alert('Contrasena incorrecta');
+                        }
+                    } catch (error) {
+                        alert('Error de conexion');
+                    }
                 }
             }
         });
 
-        console.log('%c🔐 Sistema de Autenticación Iniciado', 'color: #6366f1; font-size: 14px; font-weight: bold;');
-        console.log('%cPresiona Ctrl + A para acceder al panel de administrador', 'color: #059669; font-size: 12px; font-weight: bold;');
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/api/admin/usuarios');
+                const data = await response.json();
+
+                document.getElementById('totalUsuarios').textContent = data.total;
+
+                const tbody = document.getElementById('usuariosTable');
+                if (data.usuarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No hay usuarios</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.usuarios.map(function(u) {
+                    return '<tr><td>' + u.id + '</td><td>' + u.nombre + '</td><td>' + u.email + '</td><td>' + u.edad + ' anos</td><td>' + u.fecha_nacimiento + '</td><td>' + u.fecha_registro + '</td></tr>';
+                }).join('');
+            } catch (error) {
+                mostrarSnackbar('Error al cargar usuarios', 'error');
+            }
+        }
+
+        function cerrarAdmin() {
+            document.getElementById('adminOverlay').classList.remove('show');
+        }
+
+        async function descargarCSV() {
+            window.location.href = '/api/admin/descargar-csv';
+            mostrarSnackbar('CSV descargado', 'success');
+        }
+
+        console.log('Sistema de Autenticacion');
+        console.log('Presiona Ctrl + A para acceder al panel de administrador');
     </script>
 </body>
 </html>
+```
+
