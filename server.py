@@ -1,0 +1,219 @@
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session, send_file
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import csv
+import os
+from functools import wraps
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'tu-clave-secreta-super-segura-cambiar'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usuarios.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+db = SQLAlchemy(app)
+
+# Ruta del archivo CSV
+CSV_FILE = 'usuarios.csv'
+
+# Modelo de Usuario
+class Usuario(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    fecha_nacimiento = db.Column(db.Date, nullable=False)
+    edad = db.Column(db.Integer, nullable=False)
+    fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'email': self.email,
+            'fecha_nacimiento': self.fecha_nacimiento.strftime('%Y-%m-%d'),
+            'edad': self.edad,
+            'fecha_registro': self.fecha_registro.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+    def to_csv_row(self):
+        return [
+            self.id,
+            self.nombre,
+            self.email,
+            self.fecha_nacimiento.strftime('%Y-%m-%d'),
+            self.edad,
+            self.fecha_registro.strftime('%Y-%m-%d %H:%M:%S')
+        ]
+
+def inicializar_csv():
+    """Crea el archivo CSV si no existe"""
+    if not os.path.exists(CSV_FILE):
+        with open(CSV_FILE, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['ID', 'Nombre', 'Email', 'Fecha_Nacimiento', 'Edad', 'Fecha_Registro'])
+        print(f"Archivo CSV creado: {CSV_FILE}")
+
+def guardar_usuario_en_csv(usuario):
+    """Guarda un usuario en el archivo CSV"""
+    try:
+        with open(CSV_FILE, 'a', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(usuario.to_csv_row())
+        print(f"Usuario {usuario.nombre} guardado en CSV")
+    except Exception as e:
+        print(f"Error al guardar en CSV: {e}")
+
+def regenerar_csv_completo():
+    """Regenera el CSV completo desde la base de datos"""
+    try:
+        usuarios = Usuario.query.all()
+        with open(CSV_FILE, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(['ID', 'Nombre', 'Email', 'Fecha_Nacimiento', 'Edad', 'Fecha_Registro'])
+            for usuario in usuarios:
+                writer.writerow(usuario.to_csv_row())
+        print(f"CSV regenerado con {len(usuarios)} usuarios")
+    except Exception as e:
+        print(f"Error al regenerar CSV: {e}")
+
+# Decorador para proteger rutas de admin
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not session.get('is_admin'):
+            return jsonify({'error': 'Acceso no autorizado'}), 403
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/')
+def index():
+    return render_template('login.html')
+
+@app.route('/api/registro', methods=['POST'])
+def registro():
+    data = request.json
+    
+    if not data.get('nombre') or len(data['nombre']) < 3:
+        return jsonify({'error': 'Nombre debe tener minimo 3 caracteres'}), 400
+    
+    if not data.get('email') or '@' not in data['email']:
+        return jsonify({'error': 'Email invalido'}), 400
+    
+    if not data.get('password') or len(data['password']) < 8:
+        return jsonify({'error': 'Contrasena debe tener minimo 8 caracteres'}), 400
+    
+    if Usuario.query.filter_by(email=data['email'].lower()).first():
+        return jsonify({'error': 'Este email ya esta registrado'}), 400
+    
+    fecha_nac = datetime.strptime(data['fecha_nacimiento'], '%Y-%m-%d')
+    edad = (datetime.now() - fecha_nac).days // 365
+    
+    if edad < 18:
+        return jsonify({'error': 'Debes ser mayor de 18 anos'}), 400
+    
+    nuevo_usuario = Usuario(
+        nombre=data['nombre'],
+        email=data['email'].lower(),
+        password=generate_password_hash(data['password']),
+        fecha_nacimiento=fecha_nac,
+        edad=edad
+    )
+    
+    db.session.add(nuevo_usuario)
+    db.session.commit()
+    
+    guardar_usuario_en_csv(nuevo_usuario)
+    
+    return jsonify({
+        'success': True,
+        'mensaje': 'Cuenta creada exitosamente. Bienvenido ' + data['nombre']
+    })
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    data = request.json
+    
+    usuario = Usuario.query.filter_by(email=data['email'].lower()).first()
+    
+    if not usuario:
+        return jsonify({'error': 'No existe cuenta con este email'}), 401
+    
+    if not check_password_hash(usuario.password, data['password']):
+        return jsonify({'error': 'Contrasena incorrecta'}), 401
+    
+    session['user_id'] = usuario.id
+    session['user_name'] = usuario.nombre
+    
+    return jsonify({
+        'success': True,
+        'mensaje': 'Bienvenido ' + usuario.nombre
+    })
+
+@app.route('/api/admin/login', methods=['POST'])
+def admin_login():
+    data = request.json
+    
+    if data.get('password') == 'Admin2024!':
+        session['is_admin'] = True
+        return jsonify({'success': True})
+    
+    return jsonify({'error': 'Contrasena incorrecta'}), 401
+
+@app.route('/api/admin/usuarios', methods=['GET'])
+@admin_required
+def get_usuarios():
+    usuarios = Usuario.query.all()
+    return jsonify({
+        'usuarios': [u.to_dict() for u in usuarios],
+        'total': len(usuarios)
+    })
+
+@app.route('/api/admin/descargar-csv', methods=['GET'])
+@admin_required
+def descargar_csv():
+    regenerar_csv_completo()
+    
+    if not os.path.exists(CSV_FILE):
+        return jsonify({'error': 'Archivo CSV no encontrado'}), 404
+    
+    fecha_actual = datetime.now().strftime('%Y-%m-%d')
+    nombre_descarga = 'usuarios_' + fecha_actual + '.csv'
+    
+    return send_file(
+        CSV_FILE,
+        mimetype='text/csv',
+        as_attachment=True,
+        download_name=nombre_descarga
+    )
+
+@app.route('/api/admin/regenerar-csv', methods=['POST'])
+@admin_required
+def regenerar_csv():
+    regenerar_csv_completo()
+    return jsonify({'success': True, 'mensaje': 'CSV regenerado correctamente'})
+
+@app.route('/api/admin/logout', methods=['POST'])
+def admin_logout():
+    session.pop('is_admin', None)
+    return jsonify({'success': True})
+
+@app.route('/logout')
+def logout():
+    session.clear()
+    return redirect(url_for('index'))
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
+        inicializar_csv()
+    
+    print("\n" + "="*50)
+    print("Sistema de Autenticacion con CSV")
+    print("="*50)
+    print("Archivo CSV: " + os.path.abspath(CSV_FILE))
+    print("Servidor: http://localhost:5000")
+    print("Admin: Ctrl + A (password: Admin2024!)")
+    print("="*50 + "\n")
+    
+    app.run(debug=True, port=5000)

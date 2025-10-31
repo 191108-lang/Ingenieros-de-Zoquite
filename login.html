@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Autenticación</title>
+    
+    <!-- Material Design 3 -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --md-sys-color-primary: #6750A4;
+            --md-sys-color-on-primary: #FFFFFF;
+            --md-sys-color-primary-container: #EADDFF;
+            --md-sys-color-on-primary-container: #21005D;
+            --md-sys-color-secondary: #625B71;
+            --md-sys-color-surface: #FFFBFE;
+            --md-sys-color-surface-variant: #E7E0EC;
+            --md-sys-color-on-surface: #1C1B1F;
+            --md-sys-color-on-surface-variant: #49454F;
+            --md-sys-color-error: #B3261E;
+            --md-sys-color-background: #F5F1F8;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--md-sys-color-surface);
+            border-radius: 28px;
+            box-shadow: 0 3px 1px -2px rgba(0,0,0,.2), 0 2px 2px 0 rgba(0,0,0,.14), 0 1px 5px 0 rgba(0,0,0,.12);
+            width: 100%;
+            max-width: 420px;
+            overflow: hidden;
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--md-sys-color-primary) 0%, #764ba2 100%);
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .card-header .icon {
+            width: 64px;
+            height: 64px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+        }
+
+        .card-header .material-icons {
+            font-size: 32px;
+        }
+
+        .card-header h1 {
+            font-size: 28px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .card-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card-content {
+            padding: 24px;
+        }
+
+        .text-field {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .text-field.hidden {
+            display: none;
+        }
+
+        .text-field input {
+            width: 100%;
+            padding: 16px 16px 16px 48px;
+            border: 1px solid var(--md-sys-color-on-surface-variant);
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            background: var(--md-sys-color-surface);
+            color: var(--md-sys-color-on-surface);
+            transition: all 0.2s ease;
+            outline: none;
+        }
+
+        .text-field input:focus {
+            border-color: var(--md-sys-color-primary);
+            border-width: 2px;
+            padding: 15px 15px 15px 47px;
+        }
+
+        .text-field .icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+        }
+
+        .text-field label {
+            position: absolute;
+            left: 48px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.2s ease;
+        }
+
+        .text-field input:focus + label,
+        .text-field input:not(:placeholder-shown) + label {
+            top: -10px;
+            left: 12px;
+            font-size: 12px;
+            background: var(--md-sys-color-surface);
+            padding: 0 4px;
+            color: var(--md-sys-color-primary);
+        }
+
+        .error-message {
+            color: var(--md-sys-color-error);
+            font-size: 12px;
+            margin-top: 4px;
+            margin-left: 16px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .text-field.error input {
+            border-color: var(--md-sys-color-error);
+            border-width: 2px;
+        }
+
+        .button {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 100px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Roboto', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button-primary {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-top: 8px;
+        }
+
+        .button-primary:hover {
+            background: #5a3f94;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transform: translateY(-2px);
+        }
+
+        .button-primary:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+            margin: 24px 0;
+        }
+
+        .text-center {
+            text-align: center;
+            color: var(--md-sys-color-on-surface-variant);
+            font-size: 14px;
+        }
+
+        .text-button {
+            background: none;
+            border: none;
+            color: var(--md-sys-color-primary);
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background 0.2s ease;
+        }
+
+        .text-button:hover {
+            background: var(--md-sys-color-primary-container);
+        }
+
+        .snackbar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #323232;
+            color: white;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .snackbar.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .snackbar.success {
+            background: #2e7d32;
+        }
+
+        .snackbar.error {
+            background: #c62828;
+        }
+
+        .admin-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .admin-overlay.show {
+            display: flex;
+        }
+
+        .admin-dialog {
+            background: var(--md-sys-color-surface);
+            border-radius: 28px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .admin-header {
+            background: var(--md-sys-color-primary);
+            color: var(--md-sys-color-on-primary);
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h2 {
+            font-size: 24px;
+            font-weight: 500;
+        }
+
+        .admin-content {
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: var(--md-sys-color-primary-container);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .stat-card .number {
+            font-size: 32px;
+            font-weight: 500;
+            color: var(--md-sys-color-on-primary-container);
+        }
+
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--md-sys-color-on-primary-container);
+            opacity: 0.8;
+            margin-top: 4px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--md-sys-color-surface-variant);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: var(--md-sys-color-surface-variant);
+            padding: 16px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--md-sys-color-on-surface);
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 16px;
+            border-top: 1px solid var(--md-sys-color-surface-variant);
+            color: var(--md-sys-color-on-surface);
+        }
+
+        tr:hover {
+            background: var(--md-sys-color-surface-variant);
+        }
+
+        .button-secondary {
+            background: var(--md-sys-color-secondary);
+            color: var(--md-sys-color-on-primary);
+        }
+
+        .button-secondary:hover {
+            background: #544c63;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="card-header">
+            <div class="icon">
+                <span class="material-icons">person</span>
+            </div>
+            <h1 id="title">Iniciar Sesion</h1>
+            <p>Bienvenido al sistema</p>
+        </div>
+
+        <div class="card-content">
+            <form id="authForm">
+                <div class="text-field hidden" id="nameField">
+                    <span class="material-icons icon">badge</span>
+                    <input type="text" id="nombre" placeholder=" ">
+                    <label>Nombre completo</label>
+                    <div class="error-message" id="nombreError"></div>
+                </div>
+
+                <div class="text-field hidden" id="birthdateField">
+                    <span class="material-icons icon">cake</span>
+                    <input type="date" id="fecha_nacimiento" placeholder=" ">
+                    <label>Fecha de Nacimiento</label>
+                    <div class="error-message" id="fecha_nacimientoError"></div>
+                </div>
+
+                <div class="text-field">
+                    <span class="material-icons icon">email</span>
+                    <input type="email" id="email" placeholder=" ">
+                    <label>Correo Electronico</label>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+
+                <div class="text-field">
+                    <span class="material-icons icon">lock</span>
+                    <input type="password" id="password" placeholder=" ">
+                    <label>Contrasena</label>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+
+                <div class="text-field hidden" id="confirmPasswordField">
+                    <span class="material-icons icon">lock</span>
+                    <input type="password" id="confirmPassword" placeholder=" ">
+                    <label>Confirmar Contrasena</label>
+                    <div class="error-message" id="confirmPasswordError"></div>
+                </div>
+
+                <button type="submit" class="button button-primary" id="submitBtn">
+                    Iniciar Sesion
+                </button>
+            </form>
+
+            <div class="divider"></div>
+
+            <div class="text-center">
+                <span id="switchText">No tienes cuenta?</span>
+                <button class="text-button" id="switchBtn">Registrate aqui</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="snackbar" id="snackbar">
+        <span class="material-icons" id="snackbarIcon"></span>
+        <span id="snackbarMessage"></span>
+    </div>
+
+    <div class="admin-overlay" id="adminOverlay">
+        <div class="admin-dialog">
+            <div class="admin-header">
+                <h2>Panel de Administrador</h2>
+                <button class="text-button" onclick="cerrarAdmin()" style="color: white;">
+                    <span class="material-icons">close</span>
+                </button>
+            </div>
+            <div class="admin-content">
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="number" id="totalUsuarios">0</div>
+                        <div class="label">Usuarios Registrados</div>
+                    </div>
+                </div>
+
+                <button class="button button-secondary" onclick="descargarCSV()" style="margin-bottom: 16px;">
+                    <span class="material-icons" style="vertical-align: middle; margin-right: 8px;">download</span>
+                    Descargar CSV
+                </button>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Edad</th>
+                                <th>Fecha Nacimiento</th>
+                                <th>Registro</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usuariosTable">
+                            <tr>
+                                <td colspan="6" style="text-align: center; color: #999;">
+                                    Cargando usuarios...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLogin = true;
+
+        document.getElementById('fecha_nacimiento').max = new Date().toISOString().split('T')[0];
+
+        document.getElementById('switchBtn').addEventListener('click', function() {
+            isLogin = !isLogin;
+            const nameField = document.getElementById('nameField');
+            const birthdateField = document.getElementById('birthdateField');
+            const confirmPasswordField = document.getElementById('confirmPasswordField');
+            const title = document.getElementById('title');
+            const switchText = document.getElementById('switchText');
+            const switchBtn = document.getElementById('switchBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (isLogin) {
+                nameField.classList.add('hidden');
+                birthdateField.classList.add('hidden');
+                confirmPasswordField.classList.add('hidden');
+                title.textContent = 'Iniciar Sesion';
+                switchText.textContent = 'No tienes cuenta?';
+                switchBtn.textContent = 'Registrate aqui';
+                submitBtn.textContent = 'Iniciar Sesion';
+            } else {
+                nameField.classList.remove('hidden');
+                birthdateField.classList.remove('hidden');
+                confirmPasswordField.classList.remove('hidden');
+                title.textContent = 'Crear Cuenta';
+                switchText.textContent = 'Ya tienes cuenta?';
+                switchBtn.textContent = 'Inicia Sesion';
+                submitBtn.textContent = 'Registrarse';
+            }
+
+            limpiarFormulario();
+        });
+
+        document.getElementById('authForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (!validarFormulario()) return;
+
+            const data = {
+                email: document.getElementById('email').value.trim(),
+                password: document.getElementById('password').value
+            };
+
+            if (!isLogin) {
+                data.nombre = document.getElementById('nombre').value.trim();
+                data.fecha_nacimiento = document.getElementById('fecha_nacimiento').value;
+            }
+
+            const endpoint = isLogin ? '/api/login' : '/api/registro';
+
+            try {
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    mostrarSnackbar(result.mensaje, 'success');
+                    if (!isLogin) limpiarFormulario();
+                } else {
+                    mostrarSnackbar(result.error, 'error');
+                }
+            } catch (error) {
+                mostrarSnackbar('Error de conexion', 'error');
+            }
+        });
+
+        function validarFormulario() {
+            let valido = true;
+
+            if (!isLogin) {
+                const nombre = document.getElementById('nombre').value.trim();
+                if (!nombre || nombre.length < 3) {
+                    mostrarError('nombre', 'Minimo 3 caracteres');
+                    valido = false;
+                } else {
+                    ocultarError('nombre');
+                }
+
+                const fechaNac = document.getElementById('fecha_nacimiento').value;
+                if (!fechaNac) {
+                    mostrarError('fecha_nacimiento', 'Fecha requerida');
+                    valido = false;
+                } else {
+                    ocultarError('fecha_nacimiento');
+                }
+
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const password = document.getElementById('password').value;
+                if (confirmPassword !== password) {
+                    mostrarError('confirmPassword', 'Las contrasenas no coinciden');
+                    valido = false;
+                } else {
+                    ocultarError('confirmPassword');
+                }
+            }
+
+            const email = document.getElementById('email').value.trim();
+            if (!email || !email.includes('@')) {
+                mostrarError('email', 'Email invalido');
+                valido = false;
+            } else {
+                ocultarError('email');
+            }
+
+            const password = document.getElementById('password').value;
+            if (!password || password.length < 8) {
+                mostrarError('password', 'Minimo 8 caracteres');
+                valido = false;
+            } else {
+                ocultarError('password');
+            }
+
+            return valido;
+        }
+
+        function mostrarError(campo, mensaje) {
+            const field = document.getElementById(campo).closest('.text-field');
+            const errorDiv = document.getElementById(campo + 'Error');
+            field.classList.add('error');
+            errorDiv.textContent = mensaje;
+            errorDiv.classList.add('show');
+        }
+
+        function ocultarError(campo) {
+            const field = document.getElementById(campo).closest('.text-field');
+            const errorDiv = document.getElementById(campo + 'Error');
+            field.classList.remove('error');
+            errorDiv.classList.remove('show');
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('authForm').reset();
+            ['nombre', 'email', 'password', 'fecha_nacimiento', 'confirmPassword'].forEach(ocultarError);
+        }
+
+        function mostrarSnackbar(mensaje, tipo) {
+            const snackbar = document.getElementById('snackbar');
+            const icon = document.getElementById('snackbarIcon');
+            const message = document.getElementById('snackbarMessage');
+
+            icon.textContent = tipo === 'success' ? 'check_circle' : 'error';
+            message.textContent = mensaje;
+            snackbar.className = 'snackbar ' + tipo + ' show';
+
+            setTimeout(function() {
+                snackbar.classList.remove('show');
+            }, 3000);
+        }
+
+        document.addEventListener('keydown', async function(e) {
+            if (e.ctrlKey && e.key === 'a') {
+                e.preventDefault();
+                const password = prompt('Contrasena de administrador:');
+                
+                if (password) {
+                    try {
+                        const response = await fetch('/api/admin/login', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({password: password})
+                        });
+
+                        if (response.ok) {
+                            document.getElementById('adminOverlay').classList.add('show');
+                            cargarUsuarios();
+                        } else {
+                            alert('Contrasena incorrecta');
+                        }
+                    } catch (error) {
+                        alert('Error de conexion');
+                    }
+                }
+            }
+        });
+
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/api/admin/usuarios');
+                const data = await response.json();
+
+                document.getElementById('totalUsuarios').textContent = data.total;
+
+                const tbody = document.getElementById('usuariosTable');
+                if (data.usuarios.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No hay usuarios</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.usuarios.map(function(u) {
+                    return '<tr><td>' + u.id + '</td><td>' + u.nombre + '</td><td>' + u.email + '</td><td>' + u.edad + ' anos</td><td>' + u.fecha_nacimiento + '</td><td>' + u.fecha_registro + '</td></tr>';
+                }).join('');
+            } catch (error) {
+                mostrarSnackbar('Error al cargar usuarios', 'error');
+            }
+        }
+
+        function cerrarAdmin() {
+            document.getElementById('adminOverlay').classList.remove('show');
+        }
+
+        async function descargarCSV() {
+            window.location.href = '/api/admin/descargar-csv';
+            mostrarSnackbar('CSV descargado', 'success');
+        }
+
+        console.log('Sistema de Autenticacion');
+        console.log('Presiona Ctrl + A para acceder al panel de administrador');
+    </script>
+</body>
+</html>
+```
+
